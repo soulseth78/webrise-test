@@ -14,6 +14,7 @@ import org.example.webrise.service.SubscriptionService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -32,18 +33,22 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
         User user = findById(userId);
 
-        Subscription subscription = subscriptionRepository
-                .findByServiceName(request.getServiceName())
-                .orElseGet(() -> {
-                    Subscription newSub = new Subscription();
-                    newSub.setServiceName(request.getServiceName());
-                    return subscriptionRepository.save(newSub);
-                });
+        // Проверка, есть ли у этого пользователя подписка с таким serviceName
+        Optional<Subscription> existing = user.getSubscriptions().stream()
+                .filter(s -> s.getServiceName().equalsIgnoreCase(request.getServiceName()))
+                .findFirst();
 
-        user.getSubscriptions().add(subscription);
-        userRepository.save(user);
+        if (existing.isPresent()) {
+            throw new IllegalStateException("Подписка уже добавлена пользователю");
+        }
 
-        return subscriptionMapper.toDto(subscription);
+        Subscription subscription = new Subscription();
+        subscription.setServiceName(request.getServiceName());
+        subscription.setUser(user);
+
+        Subscription saved = subscriptionRepository.save(subscription);
+
+        return subscriptionMapper.toDto(saved);
     }
 
     @Override
@@ -70,16 +75,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     public List<SubscriptionDto> getTopSubscriptions() {
-        log.info("Получение топ- популярных подписок");
-        List<Subscription> topSubscriptions = subscriptionRepository.findTopSubscriptions();
+        log.info("Получение топ-популярных подписок");
 
-        // Ограничиваем результат до 3 самых популярных подписок
-        return topSubscriptions.stream()
-                .limit(3)  // Ограничиваем до 3
-                .map(subscription -> new SubscriptionDto(
-                        subscription.getId(),
-                        subscription.getServiceName(),
-                        subscription.getCreatedAt()))  // Используем ваш DTO без изменений
+        List<Object[]> topServiceData = subscriptionRepository.findTopServiceNames();
+
+        return topServiceData.stream()
+                .limit(3)
+                .map(obj -> new SubscriptionDto(
+                        null, // ID отсутствует
+                        (String) obj[0], // serviceName
+                        null  // createdAt — не нужен для статистики
+                ))
                 .collect(Collectors.toList());
     }
 

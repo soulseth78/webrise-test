@@ -9,7 +9,6 @@ import org.example.webrise.exception.NotFoundException;
 import org.example.webrise.mapper.UserMapper;
 import org.example.webrise.repository.UserRepository;
 import org.example.webrise.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
