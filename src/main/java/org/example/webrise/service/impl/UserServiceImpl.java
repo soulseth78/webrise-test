@@ -41,7 +41,7 @@ public class UserServiceImpl implements UserService {
         log.debug("Updating user with id: {}, new data: {}", id, request);
         User user = findById(id);
         user.setName(request.getName());
-        user.setName(request.getEmail());
+        user.setEmail(request.getEmail());
         log.info("User updated with id: {}", user.getId());
         return userMapper.toDto(userRepository.save(user));
     }
