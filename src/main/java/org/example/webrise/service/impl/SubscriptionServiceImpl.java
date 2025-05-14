@@ -12,6 +12,7 @@ import org.example.webrise.repository.SubscriptionRepository;
 import org.example.webrise.repository.UserRepository;
 import org.example.webrise.service.SubscriptionService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionMapper subscriptionMapper;
 
     @Override
+    @Transactional
     public SubscriptionDto addSubscriptionToUser(UUID userId, CreateSubscriptionRequest request) {
         log.info("Добавление подписки '{}' пользователю с ID: {}", request.getServiceName(), userId);
 
@@ -52,6 +54,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<SubscriptionDto> getUserSubscriptions(UUID userId) {
         User user = findById(userId);
 
@@ -62,6 +65,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    @Transactional
     public void removeSubscriptionFromUser(UUID userId, UUID subscriptionId) {
         User user = findById(userId);
 
@@ -74,6 +78,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<SubscriptionDto> getTopSubscriptions() {
         log.info("Получение топ-популярных подписок");
 

@@ -1,5 +1,6 @@
 package org.example.webrise.service.impl;
 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.webrise.dto.CreateUserRequest;
@@ -10,6 +11,7 @@ import org.example.webrise.mapper.UserMapper;
 import org.example.webrise.repository.UserRepository;
 import org.example.webrise.service.UserService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.UUID;
 
@@ -22,6 +24,7 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
 
     @Override
+    @Transactional
     public UserDto createUser(CreateUserRequest request) {
         log.debug("Creating user with data: {}", request);
         User user = userMapper.toEntity(request);
@@ -30,12 +33,14 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public UserDto getUserById(UUID id) {
         log.debug("Fetching user with id: {}", id);
         return userMapper.toDto(findById(id));
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(UUID id, CreateUserRequest request) {
         log.debug("Updating user with id: {}, new data: {}", id, request);
         User user = findById(id);
@@ -46,6 +51,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(UUID id) {
         log.debug("Deleting user with id: {}", id);
         User user = findById(id);
